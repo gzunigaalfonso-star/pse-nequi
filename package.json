@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node server.js",
     "interactive": "node src/interactive.js",
     "server": "node server.js",
     "test": "node src/index.js --test",
