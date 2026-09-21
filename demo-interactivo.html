@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo - Sistema Nequi en Acción</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+    }
+
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .demo-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    .panel-content {
+      padding: 30px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 600px;
+    }
+
+    /* Sitio del Cliente */
+    .site-demo {
+      text-align: center;
+    }
+
+    .site-demo h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .product-card {
+      background: #f8f9ff;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .product-card h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .price {
+      font-size: 2em;
+      color: #333;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    .btn-pagar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+      width: 100%;
+    }
+
+    .btn-pagar:hover {
+      transform: scale(1.02);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.activo {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal h2 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .modal p {
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 0.9em;
+    }
+
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 0.95em;
+      font-family: inherit;
+    }
+
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    }
+
+    .info-box {
+      background: #f0f7ff;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 12px;
+      background: #f0f0f0;
+      color: #333;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #e8e8e8;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 12px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+
+    /* Pantalla de Carga */
+    .loading-screen {
+      display: none;
+      text-align: center;
+    }
+
+    .loading-screen.activa {
+      display: block;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Resultado Éxito */
+    .resultado {
+      display: none;
+      text-align: center;
+    }
+
+    .resultado.activo {
+      display: block;
+    }
+
+    .resultado-success {
+      font-size: 3em;
+      margin: 20px 0;
+      animation: bounce 0.6s ease-out;
+    }
+
+    @keyframes bounce {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .resultado h3 {
+      color: #28a745;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+
+    .resultado-detalles {
+      background: #f0fff4;
+      border: 2px solid #28a745;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .resultado-detalles div {
+      padding: 8px 0;
+      color: #333;
+      font-size: 0.9em;
+      border-bottom: 1px solid #d4edda;
+    }
+
+    .resultado-detalles div:last-child {
+      border-bottom: none;
+    }
+
+    .btn-reiniciar {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .btn-reiniciar:hover {
+      background: #5568d3;
+    }
+
+    /* Log de Eventos */
+    .log-section {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      line-height: 1.6;
+      padding: 20px;
+      border-radius: 8px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      padding: 8px 0;
+      border-bottom: 1px solid #333;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-time {
+      color: #888;
+      margin-right: 10px;
+    }
+
+    .log-success {
+      color: #4ec9b0;
+    }
+
+    .log-info {
+      color: #569cd6;
+    }
+
+    .log-process {
+      color: #dcdcaa;
+    }
+
+    .log-bank {
+      color: #ce9178;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-container">
+  <!-- Panel Izquierdo: Sitio del Cliente -->
+  <div class="panel">
+    <div class="panel-header">🌐 Sitio del Cliente</div>
+    <div class="panel-content">
+      <div class="site-demo" id="siteContent">
+        <h2>Mi Tienda Online</h2>
+
+        <div class="product-card">
+          <h3>Recarga Nequi</h3>
+          <p>Carga dinero en tu cuenta Nequi al instante</p>
+          <div class="price">$5,000</div>
+          <button class="btn-pagar" onclick="abrirModal()">
+            Pagar Ahora
+          </button>
+        </div>
+
+        <p style="color: #999; font-size: 0.85em;">
+          Haz click en "Pagar Ahora" para ver el flujo completo automatizado
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Derecho: Log de Eventos -->
+  <div class="panel">
+    <div class="panel-header">📊 Log de Eventos del Sistema</div>
+    <div class="panel-content">
+      <div class="log-section" id="logSection">
+        <div class="log-entry">
+          <span class="log-time">[00:00]</span>
+          <span class="log-info">Sistema listo para demostración</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-time">[00:00]</span>
+          <span class="log-info">Esperando acción del usuario...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal PSE -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div id="modalContent">
+      <!-- Contenido dinámico aquí -->
+    </div>
+  </div>
+</div>
+
+<script>
+const bancos = [
+  'ACCION FIDUCIARIA', 'ADMINISTRADOR CREDITO FICTO', 'ALIANZA COOPERATIVA', 'AVVILLAS',
+  'BACHO', 'BANCO AGRARIO', 'BANCO AMERICANO', 'BANCO ARQUIA', 'BANCO CAJA SOCIAL',
+  'BANCO CAPILAR', 'BANCO COMERCIAL ALEMAN', 'BANCO CORPBANCA', 'BANCO CREDICORP',
+  'BANCO DAVIVIENDA', 'BANCO DE AMERICA CENTRAL', 'BANCO DE BOGOTA', 'BANCO DE COLOMBIA',
+  'BANCO DE CREDITO COMUNITARIO', 'BANCO DE OCCIDENTE', 'BANCO ESTADO', 'BANCO EXTERIOR',
+  'BANCO FINTERRA', 'BANCO GENERAL DE NEGOCIOS', 'BANCO INMOBILIARIO', 'BANCO INTERNACIONAL',
+  'BANCO J.P. MORGAN', 'BANCO MERCANTIL', 'BANCO METROPOLITANO', 'BANCO MULTIBANCO',
+  'BANCO PAN AMERICAN', 'BANCO PATRIMONIAL', 'BANCO PICHINCHA', 'BANCO POPULAR',
+  'BANCO PROCREDIT', 'BANCO REGIONAL', 'BANCO SABADELL', 'BANCO SANTANDER',
+  'BANCO SUKHAI', 'BANCO TELECOMM', 'BANCO UNION', 'BANCO VIRTUAL', 'BANCOAMAZONASCA',
+  'BANCOLOMBIA', 'BBVA', 'CITIBANK', 'COLPATRIA', 'COOPCENTRAL', 'ICBC', 'SCOTIABANK'
+].sort();
+
+const fases = {
+  sitio: 'sitio',
+  formulario: 'formulario',
+  cargando: 'cargando',
+  exito: 'exito'
+};
+
+let faseActual = fases.sitio;
+let datosFormulario = {};
+
+function log(mensaje, tipo = 'info') {
+  const logSection = document.getElementById('logSection');
+  const time = new Date().toLocaleTimeString('es-ES', { hour12: false });
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+
+  let tipoClass = `log-${tipo}`;
+  entry.innerHTML = `
+    <span class="log-time">[${time}]</span>
+    <span class="${tipoClass}">${mensaje}</span>
+  `;
+
+  logSection.appendChild(entry);
+  logSection.scrollTop = logSection.scrollHeight;
+}
+
+function abrirModal() {
+  log('👤 Usuario hace click en "Pagar Ahora"', 'process');
+  faseActual = fases.formulario;
+
+  setTimeout(() => {
+    log('🌐 SDK iniciando...', 'info');
+    setTimeout(() => {
+      log('📱 Modal PSE abierto', 'success');
+      mostrarFormulario();
+      document.getElementById('modalOverlay').classList.add('activo');
+    }, 500);
+  }, 300);
+}
+
+function mostrarFormulario() {
+  const modalContent = document.getElementById('modalContent');
+
+  let opcionesBancos = '<option value="">-- Selecciona banco --</option>';
+  bancos.forEach(banco => {
+    opcionesBancos += `<option value="${banco}">${banco}</option>`;
+  });
+
+  modalContent.innerHTML = `
+    <h2>Confirmar Pago</h2>
+    <p>Selecciona tu tipo de persona y banco para continuar</p>
+
+    <div class="info-box">
+      <strong>✓ Monto:</strong> $5,000<br>
+      <small style="color: #888;">Los datos de tu número se validan automáticamente</small>
+    </div>
+
+    <div class="form-group">
+      <label for="tipoPersona">Tipo de Persona:</label>
+      <select id="tipoPersona" onchange="datosFormulario.tipoPersona = this.value">
+        <option value="">-- Selecciona --</option>
+        <option value="Natural">Natural</option>
+        <option value="Juridica">Jurídica</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="banco">Elige el Banco:</label>
+      <select id="banco" onchange="datosFormulario.banco = this.value">
+        ${opcionesBancos}
+      </select>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" onclick="procesarPago()">Continuar</button>
+    </div>
+  `;
+}
+
+function cerrarModal() {
+  log('❌ Usuario canceló el pago', 'info');
+  document.getElementById('modalOverlay').classList.remove('activo');
+  faseActual = fases.sitio;
+}
+
+function procesarPago() {
+  const tipoPersona = document.getElementById('tipoPersona').value;
+  const banco = document.getElementById('banco').value;
+
+  if (!tipoPersona || !banco) {
+    alert('Por favor selecciona tipo de persona y banco');
+    return;
+  }
+
+  datosFormulario.tipoPersona = tipoPersona;
+  datosFormulario.banco = banco;
+
+  log(`✅ Usuario seleccionó: ${tipoPersona} - ${banco}`, 'success');
+  faseActual = fases.cargando;
+
+  setTimeout(() => {
+    log('📤 Enviando solicitud al servidor...', 'process');
+    mostrarCargando();
+  }, 500);
+
+  setTimeout(() => {
+    log('🔗 Servidor recibió solicitud', 'info');
+    log('✅ Validación de API Key: OK', 'success');
+  }, 1500);
+
+  setTimeout(() => {
+    log('🌐 Abriendo navegador automático en background...', 'process');
+  }, 2500);
+
+  setTimeout(() => {
+    log('📝 Llenando formulario Nequi automáticamente', 'process');
+  }, 3000);
+
+  setTimeout(() => {
+    log('  ✓ Monto: $5,000', 'success');
+  }, 3500);
+
+  setTimeout(() => {
+    log('  ✓ Tipo de persona: ' + tipoPersona, 'success');
+  }, 3900);
+
+  setTimeout(() => {
+    log('  ✓ Banco: ' + banco, 'success');
+  }, 4300);
+
+  setTimeout(() => {
+    log('  ✓ Validación completada', 'success');
+  }, 4700);
+
+  setTimeout(() => {
+    log('🔄 Procesando en PSE...', 'bank');
+  }, 5200);
+
+  setTimeout(() => {
+    log('  ✓ Pantalla PSE: Tipo de persona seleccionado', 'bank');
+  }, 5800);
+
+  setTimeout(() => {
+    log('  ✓ Email autollenado y validado', 'bank');
+  }, 6300);
+
+  setTimeout(() => {
+    log('🏦 Redirigiendo a ' + banco + '...', 'bank');
+  }, 6800);
+
+  setTimeout(() => {
+    log('  ✓ Login automático completado', 'bank');
+  }, 7400);
+
+  setTimeout(() => {
+    log('  ✓ Confirmación de pago en banco', 'bank');
+  }, 7900);
+
+  setTimeout(() => {
+    log('💳 Procesando transacción...', 'process');
+  }, 8400);
+
+  setTimeout(() => {
+    log('✅ Pago procesado exitosamente', 'success');
+    mostrarExito();
+  }, 9500);
+}
+
+function mostrarCargando() {
+  const modalContent = document.getElementById('modalContent');
+  modalContent.innerHTML = `
+    <div class="loading-screen activa">
+      <h2 style="color: #667eea;">Procesando pago</h2>
+      <p style="color: #666;">Completando la transacción automáticamente...</p>
+      <div class="spinner"></div>
+      <p style="color: #999; font-size: 0.85em;">Por favor no cierres esta ventana</p>
+    </div>
+  `;
+}
+
+function mostrarExito() {
+  faseActual = fases.exito;
+  const modalContent = document.getElementById('modalContent');
+  const transaccionId = 'txn_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+  modalContent.innerHTML = `
+    <div class="resultado activo">
+      <div class="resultado-success">✅</div>
+      <h3>¡Pago Completado Exitosamente!</h3>
+
+      <div class="resultado-detalles">
+        <div><strong>ID Transacción:</strong> ${transaccionId}</div>
+        <div><strong>Tipo de Persona:</strong> ${datosFormulario.tipoPersona}</div>
+        <div><strong>Banco:</strong> ${datosFormulario.banco}</div>
+        <div><strong>Monto:</strong> $5,000</div>
+        <div><strong>Estado:</strong> ✓ Recarga procesada</div>
+        <div><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</div>
+      </div>
+
+      <p style="color: #666; margin-bottom: 20px;">
+        El dinero ha sido acreditado en tu cuenta Nequi. Puedes usar tu saldo inmediatamente.
+      </p>
+
+      <button class="btn-reiniciar" onclick="reiniciar()">Nueva Transacción</button>
+    </div>
+  `;
+
+  log('📱 Modal actualizado con resultado final', 'info');
+  log('🎉 Flujo completado exitosamente de punta a punta', 'success');
+}
+
+function reiniciar() {
+  log('🔄 Reiniciando demo...', 'process');
+  faseActual = fases.sitio;
+  datosFormulario = {};
+
+  setTimeout(() => {
+    document.getElementById('modalOverlay').classList.remove('activo');
+    log('✅ Sistema listo para nueva demostración', 'success');
+  }, 300);
+}
+</script>
+
+</body>
+</html>

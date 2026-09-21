@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSE - Pago Seguro en Línea</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: white;
+      padding: 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #003da5 0%, #1a5ab8 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    .header-text h1 {
+      font-size: 1.2em;
+      color: #333;
+      margin: 0;
+    }
+
+    .header-text p {
+      color: #0066cc;
+      font-size: 0.95em;
+      margin: 5px 0 0 0;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 60px auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .content {
+      padding: 50px 40px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 1.4em;
+      color: #0066cc;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    /* Selección de tipo de persona */
+    .person-type-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 50px;
+    }
+
+    .person-option {
+      flex: 1;
+      max-width: 200px;
+      padding: 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .person-option:hover {
+      border-color: #0066cc;
+      background: #f0f7ff;
+    }
+
+    .person-option.active {
+      border-color: #ffa500;
+      background: #fffbf0;
+    }
+
+    .person-option .icon {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .person-option .label {
+      font-weight: 600;
+      color: #333;
+      font-size: 1em;
+    }
+
+    .person-option.active .label {
+      color: #ffa500;
+    }
+
+    /* Opciones de registro */
+    .registration-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .registration-option {
+      flex: 1;
+      min-width: 180px;
+      padding: 15px;
+      border: 2px solid #d0d0d0;
+      border-radius: 25px;
+      cursor: pointer;
+      text-align: center;
+      background: white;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      color: #666;
+      font-size: 0.95em;
+    }
+
+    .registration-option:hover {
+      border-color: #0066cc;
+      color: #0066cc;
+    }
+
+    .registration-option.active {
+      border-color: #ffa500;
+      background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+      color: #ffa500;
+    }
+
+    .registration-option .icon {
+      font-size: 1.3em;
+      margin-right: 8px;
+    }
+
+    /* Campo de email */
+    .form-group {
+      margin-bottom: 30px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: #0066cc;
+      font-weight: 600;
+      font-size: 0.95em;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 5px rgba(0, 102, 204, 0.2);
+    }
+
+    .form-group input::placeholder {
+      color: #999;
+    }
+
+    .monto-display-box {
+      padding: 15px;
+      background: #f0f7ff;
+      border: 2px solid #0066cc;
+      border-radius: 6px;
+      font-size: 1.3em;
+      font-weight: 700;
+      color: #0066cc;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .monto-display-box.found {
+      background: #e8f5e9;
+      border-color: #28a745;
+      color: #28a745;
+    }
+
+    .monto-display-box.notfound {
+      background: #ffebee;
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+
+    .monto-helper-text {
+      color: #666;
+      margin-top: 5px;
+      display: block;
+      font-size: 0.85em;
+    }
+
+    /* Botones */
+    .button-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 14px 40px;
+      border: 2px solid #0066cc;
+      border-radius: 25px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: capitalize;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #0066cc;
+    }
+
+    .btn-secondary:hover {
+      background: #f0f7ff;
+    }
+
+    .btn-primary {
+      background: #ffa500;
+      color: white;
+      border-color: #ffa500;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover {
+      background: #ff9500;
+      box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    /* Info box */
+    .info-box {
+      background: #f9f9f9;
+      border-left: 4px solid #ffa500;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 40px;
+      display: flex;
+      gap: 15px;
+    }
+
+    .info-box .icon {
+      font-size: 1.5em;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .info-box-content h3 {
+      color: #333;
+      font-size: 0.95em;
+      margin-bottom: 8px;
+    }
+
+    .info-box-content p {
+      color: #666;
+      font-size: 0.85em;
+      margin: 5px 0;
+    }
+
+    .info-box-content a {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .info-box-content a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      background: #f5f5f5;
+      padding: 20px;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #666;
+      font-size: 0.85em;
+    }
+
+    .footer-logo .arch-logo {
+      font-size: 1.3em;
+    }
+
+    /* Pantalla de formulario (oculta inicialmente) */
+    .form-screen {
+      display: none;
+    }
+
+    .form-screen.active {
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .content {
+        padding: 30px 20px;
+      }
+
+      .person-type-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .person-option {
+        max-width: 100%;
+      }
+
+      .registration-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">PSE</div>
+    <div class="header-text">
+      <h1>PSE</h1>
+      <p>¡Fácil, rápido y seguro!</p>
+    </div>
+  </header>
+
+  <!-- Pantalla de Bienvenida PSE -->
+  <div class="welcome-screen active">
+    <div class="container">
+      <div class="content">
+        <h2 class="section-title">Selecciona el tipo de persona:</h2>
+
+        <div class="person-type-group">
+          <div class="person-option active" data-type="natural">
+            <div class="icon">👤</div>
+            <div class="label">Natural</div>
+          </div>
+          <div class="person-option" data-type="juridica">
+            <div class="icon">🏢</div>
+            <div class="label">Jurídica</div>
+          </div>
+        </div>
+
+        <div class="registration-group">
+          <div class="registration-option active" data-reg="registered">
+            <span class="icon">✓</span>
+            <span>Soy un usuario registrado</span>
+          </div>
+          <div class="registration-option" data-reg="new">
+            <span class="icon">⬆</span>
+            <span>Registrarme ahora</span>
+          </div>
+          <div class="registration-option" data-reg="preliminary">
+            <span class="icon">✕</span>
+            <span>Registro preliminar</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Ingresa tu correo electrónico <span style="color: #ff0000;">*</span></label>
+          <input type="email" id="email" placeholder="Ej: correo@pse.com.co" required>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="goBack()">Regresar al comercio</button>
+          <button class="btn btn-primary" onclick="proceedToBank()">Ir al Banco</button>
+        </div>
+
+        <div class="info-box">
+          <div class="icon">ℹ️</div>
+          <div class="info-box-content">
+            <h3>Para mayor información comunicate con nosotros:</h3>
+            <p><strong>En Bogotá:</strong> +57 (601) 3808890 opción 5</p>
+            <p><strong>Contáctanos:</strong> <a href="https://www.pse.com.co/persona-centro-de-ayuda" target="_blank">https://www.pse.com.co/persona-centro-de-ayuda</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pantalla de Recargas Nequi -->
+  <div class="form-screen" id="formScreen">
+    <div class="container">
+      <div class="content">
+        <h2 class="section-title">Recarga tu Nequi</h2>
+
+        <div class="form-group">
+          <label for="numeroRecarga">Número de recarga</label>
+          <input type="tel" id="numeroRecarga" placeholder="300XXXXXXXX" required>
+          <small style="color: #0066cc; margin-top: 5px; display: block;">Ingresa el número de recarga</small>
+        </div>
+
+        <div class="form-group">
+          <label for="montoDisplay">Monto a recargar</label>
+          <div class="monto-display-box" id="montoDisplayBox">
+            $<span id="montoDisplay">0</span>
+          </div>
+          <input type="hidden" id="monto">
+          <small class="monto-helper-text">El monto se calcula automáticamente según el número</small>
+        </div>
+
+        <div class="form-group">
+          <label for="tipoPersona">Tipo de persona</label>
+          <select id="tipoPersona" required>
+            <option value="">Selecciona...</option>
+            <option value="Natural" selected>Natural</option>
+            <option value="Juridica">Jurídica</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="banco">Elige el banco</label>
+          <select id="banco" required>
+            <option value="">Selecciona...</option>
+            <option value="ACCION FIDUCIARIA">ACCION FIDUCIARIA</option>
+            <option value="ALIANZA FIDUCIARIA">ALIANZA FIDUCIARIA</option>
+            <option value="BAN100">BAN100</option>
+            <option value="BANCAMIA S.A.">BANCAMIA S.A.</option>
+            <option value="BANCO AGRARIO">BANCO AGRARIO</option>
+            <option value="BANCO AV VILLAS">BANCO AV VILLAS</option>
+            <option value="BANCO BBVA COLOMBIA S.A.">BANCO BBVA COLOMBIA S.A.</option>
+            <option value="BANCO CAJA SOCIAL">BANCO CAJA SOCIAL</option>
+            <option value="BANCO CONTACTAR">BANCO CONTACTAR</option>
+            <option value="BANCO COOPERATIVO COOPCENTRAL">BANCO COOPERATIVO COOPCENTRAL</option>
+            <option value="BANCO DAVIVIENDA">BANCO DAVIVIENDA</option>
+            <option value="BANCO DE BOGOTA">BANCO DE BOGOTA</option>
+            <option value="BANCO DE OCCIDENTE">BANCO DE OCCIDENTE</option>
+            <option value="BANCO FALABELLA">BANCO FALABELLA</option>
+            <option value="BANCO FINANDINA S.A. BIC">BANCO FINANDINA S.A. BIC</option>
+            <option value="BANCO GNB SUDAMERIS">BANCO GNB SUDAMERIS</option>
+            <option value="BANCO ITAU">BANCO ITAU</option>
+            <option value="BANCO J.P. MORGAN COLOMBIA S.A.">BANCO J.P. MORGAN COLOMBIA S.A.</option>
+            <option value="BANCO MUNDO MUJER S.A.">BANCO MUNDO MUJER S.A.</option>
+            <option value="BANCO PICHINCHA S.A.">BANCO PICHINCHA S.A.</option>
+            <option value="BANCO POPULAR">BANCO POPULAR</option>
+            <option value="BANCO SANTANDER COLOMBIA">BANCO SANTANDER COLOMBIA</option>
+            <option value="BANCO SERFINANZA">BANCO SERFINANZA</option>
+            <option value="BANCO UNION">BANCO UNION</option>
+            <option value="BANCOLOMBIA">BANCOLOMBIA</option>
+            <option value="BANCOOMEVA S.A.">BANCOOMEVA S.A.</option>
+            <option value="BOLD CF">BOLD CF</option>
+            <option value="CFA COOPERATIVA FINANCIERA">CFA COOPERATIVA FINANCIERA</option>
+            <option value="CITIBANK">CITIBANK</option>
+            <option value="COLTEFINANCIERA">COLTEFINANCIERA</option>
+            <option value="CONFIAR COOPERATIVA FINANCIERA">CONFIAR COOPERATIVA FINANCIERA</option>
+            <option value="COTRAFA">COTRAFA</option>
+            <option value="CREZCAMOS">CREZCAMOS</option>
+            <option value="DALE">DALE</option>
+            <option value="DAVIbank S.A.">DAVIbank S.A.</option>
+            <option value="DAVIPLATA">DAVIPLATA</option>
+            <option value="DING">DING</option>
+            <option value="FINANCIERA JURISCOOP SA COMPAÑÍA DE FINANCIAMIENTO">FINANCIERA JURISCOOP SA COMPAÑÍA DE FINANCIAMIENTO</option>
+            <option value="IRIS">IRIS</option>
+            <option value="JFK COOPERATIVA FINANCIERA">JFK COOPERATIVA FINANCIERA</option>
+            <option value="LULO BANK">LULO BANK</option>
+            <option value="MOVII S.A.">MOVII S.A.</option>
+            <option value="NU">NU</option>
+            <option value="PAYCASH">PAYCASH</option>
+            <option value="POWWI">POWWI</option>
+            <option value="RAPPIPAY">RAPPIPAY</option>
+            <option value="UALÁ">UALÁ</option>
+          </select>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="backToWelcome()">← Atrás</button>
+          <button class="btn btn-primary" onclick="submitRecharge()">Procesar Recarga</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pantalla de Redirección -->
+  <div class="redirect-screen" id="redirectScreen">
+    <div class="redirect-container">
+      <h2 class="redirect-title">Te estamos redireccionando<br>a tu entidad financiera</h2>
+
+      <div class="pse-logo-animated">
+        <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Círculo principal -->
+          <circle cx="100" cy="100" r="95" fill="#003da5" stroke="#ffa500" stroke-width="8"/>
+
+          <!-- Texto PSE -->
+          <text x="100" y="115" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">pse</text>
+
+          <!-- Puntos animados alrededor -->
+          <circle class="pulse-dot" cx="145" cy="65" r="6" fill="#ffa500"/>
+          <circle class="pulse-dot" cx="160" cy="90" r="6" fill="#ffa500"/>
+          <circle class="pulse-dot" cx="155" cy="125" r="6" fill="#ffa500"/>
+          <circle class="pulse-dot" cx="130" cy="155" r="6" fill="#ffa500"/>
+          <circle class="pulse-dot" cx="90" cy="165" r="6" fill="#ffa500"/>
+          <circle class="pulse-dot" cx="50" cy="155" r="6" fill="#ffa500"/>
+          <circle class="pulse-dot" cx="30" cy="125" r="6" fill="#ffa500"/>
+          <circle class="pulse-dot" cx="35" cy="85" r="6" fill="#ffa500"/>
+          <circle class="pulse-dot" cx="55" cy="60" r="6" fill="#ffa500"/>
+        </svg>
+      </div>
+
+      <div class="loading-text">
+        <p>Por favor espera...</p>
+        <div class="dots">
+          <span>.</span><span>.</span><span>.</span>
+        </div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-logo">
+      <span class="arch-logo">🏗️</span>
+      <span>ACH Colombia</span>
+    </div>
+  </footer>
+
+  <style>
+    select {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 1em;
+      background-color: white;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 5px rgba(0, 102, 204, 0.2);
+    }
+
+    /* Pantalla de Redirección */
+    .redirect-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+      z-index: 9999;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .redirect-screen.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .redirect-container {
+      text-align: center;
+      background: white;
+      padding: 60px 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      max-width: 500px;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .redirect-title {
+      font-size: 1.8em;
+      color: #003da5;
+      margin-bottom: 40px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .pse-logo-animated {
+      display: flex;
+      justify-content: center;
+      margin: 40px 0;
+      animation: bounce 2s infinite;
+    }
+
+    .pse-logo-animated svg {
+      filter: drop-shadow(0 4px 15px rgba(0, 61, 165, 0.2));
+    }
+
+    .pulse-dot {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .pulse-dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .pulse-dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .pulse-dot:nth-child(4) {
+      animation-delay: 0.45s;
+    }
+
+    .pulse-dot:nth-child(5) {
+      animation-delay: 0.6s;
+    }
+
+    .pulse-dot:nth-child(6) {
+      animation-delay: 0.75s;
+    }
+
+    .pulse-dot:nth-child(7) {
+      animation-delay: 0.9s;
+    }
+
+    .pulse-dot:nth-child(8) {
+      animation-delay: 1.05s;
+    }
+
+    .pulse-dot:nth-child(9) {
+      animation-delay: 1.2s;
+    }
+
+    .loading-text {
+      margin: 30px 0;
+      font-size: 1.1em;
+      color: #666;
+    }
+
+    .loading-text p {
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .dots span {
+      font-size: 1.5em;
+      animation: blink 1.4s infinite;
+    }
+
+    .dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 30px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #003da5 0%, #0066cc 50%, #ffa500 100%);
+      animation: progress 3s ease-in-out forwards;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        r: 6;
+        opacity: 1;
+      }
+      50% {
+        r: 3;
+        opacity: 0.5;
+      }
+    }
+
+    @keyframes blink {
+      0%, 60%, 100% {
+        opacity: 0.3;
+      }
+      30% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes progress {
+      0% {
+        width: 0%;
+      }
+      100% {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .redirect-container {
+        padding: 40px 20px;
+        margin: 20px;
+      }
+
+      .redirect-title {
+        font-size: 1.4em;
+      }
+
+      .pse-logo-animated svg {
+        width: 150px;
+        height: 150px;
+      }
+    }
+  </style>
+
+  <script>
+    let selectedPersonType = 'natural';
+    let selectedRegistration = 'registered';
+
+    // Base de datos de números de recarga y montos
+    const rechargeDatabase = {
+      '3001234567': 5000,
+      '3009876543': 10000,
+      '3015555555': 15000,
+      '3025555555': 20000,
+      '3035555555': 25000,
+      '3041111111': 8000,
+      '3052222222': 12000,
+      '3063333333': 18000,
+      '3074444444': 30000,
+      '3085555555': 7000,
+      '3101111111': 50000,
+      '3112222222': 3000,
+      '3123333333': 6000,
+      '3134444444': 9000,
+      '3145555555': 11000
+    };
+
+    // Seleccionar tipo de persona
+    document.querySelectorAll('.person-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.person-option').forEach(o => o.classList.remove('active'));
+        this.classList.add('active');
+        selectedPersonType = this.dataset.type;
+      });
+    });
+
+    // Seleccionar tipo de registro
+    document.querySelectorAll('.registration-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.registration-option').forEach(o => o.classList.remove('active'));
+        this.classList.add('active');
+        selectedRegistration = this.dataset.reg;
+      });
+    });
+
+    // Ir al Banco - Ir a formulario de recargas
+    function proceedToBank() {
+      const email = document.getElementById('email').value;
+
+      if (!email) {
+        alert('Por favor ingresa tu correo electrónico');
+        return;
+      }
+
+      if (!email.includes('@')) {
+        alert('Por favor ingresa un correo válido');
+        return;
+      }
+
+      // Cambiar pantalla
+      document.querySelector('.welcome-screen').classList.remove('active');
+      document.getElementById('formScreen').classList.add('active');
+
+      // Actualizar tipo de persona en el formulario
+      document.getElementById('tipoPersona').value = selectedPersonType === 'natural' ? 'Natural' : 'Juridica';
+
+      console.log({
+        email,
+        personType: selectedPersonType,
+        registrationType: selectedRegistration
+      });
+    }
+
+    // Volver a PSE
+    function backToWelcome() {
+      document.querySelector('.welcome-screen').classList.add('active');
+      document.getElementById('formScreen').classList.remove('active');
+    }
+
+    // Regresar al comercio
+    function goBack() {
+      window.history.back();
+    }
+
+    // Procesar recarga
+    function submitRecharge() {
+      const numero = document.getElementById('numeroRecarga').value.trim();
+      const monto = document.getElementById('monto').value;
+      const banco = document.getElementById('banco').value;
+
+      if (!numero) {
+        alert('Por favor ingresa el número de recarga');
+        return;
+      }
+
+      if (!(numero in rechargeDatabase)) {
+        alert('El número de recarga no es válido. Por favor verifica.');
+        return;
+      }
+
+      if (!monto) {
+        alert('No se encontró el monto para este número');
+        return;
+      }
+
+      if (!banco) {
+        alert('Por favor selecciona un banco');
+        return;
+      }
+
+      const rechargeData = {
+        email: document.getElementById('email').value,
+        personType: selectedPersonType,
+        registrationType: selectedRegistration,
+        numero: numero,
+        monto: parseInt(monto),
+        banco: banco,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('Recarga procesada:', rechargeData);
+
+      // Mostrar pantalla de redirección
+      document.querySelector('.form-screen').classList.remove('active');
+      document.getElementById('redirectScreen').classList.add('active');
+
+      // Simular redirección después de 4 segundos
+      setTimeout(() => {
+        alert('✓ Recarga completada exitosamente:\n\nTeléfono: ' + numero + '\nMonto: $' + parseInt(monto).toLocaleString() + '\nBanco: ' + banco + '\n\nEl dinero será acreditado en pocos minutos.');
+        // Aquí irías a la siguiente pantalla o vuelves al inicio
+        backToWelcome();
+        document.getElementById('redirectScreen').classList.remove('active');
+        // Limpiar formulario
+        document.getElementById('numeroRecarga').value = '';
+        document.getElementById('monto').value = '';
+        document.getElementById('montoDisplay').textContent = '0';
+        document.getElementById('banco').value = '';
+      }, 4000);
+    }
+
+    // Permitir Enter en email para proceder
+    document.getElementById('email').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        proceedToBank();
+      }
+    });
+
+    // Buscar monto cuando se ingresa número de recarga
+    document.getElementById('numeroRecarga').addEventListener('input', function(e) {
+      const numero = this.value.trim();
+      const montoDisplay = document.getElementById('montoDisplay');
+      const montoInput = document.getElementById('monto');
+      const montoBox = document.getElementById('montoDisplayBox');
+
+      if (numero in rechargeDatabase) {
+        const monto = rechargeDatabase[numero];
+        montoDisplay.textContent = monto.toLocaleString();
+        montoInput.value = monto;
+        montoBox.classList.remove('notfound');
+        montoBox.classList.add('found');
+      } else if (numero) {
+        montoDisplay.textContent = '0';
+        montoInput.value = '';
+        montoBox.classList.remove('found');
+        montoBox.classList.add('notfound');
+      } else {
+        montoDisplay.textContent = '0';
+        montoInput.value = '';
+        montoBox.classList.remove('found', 'notfound');
+      }
+    });
+
+    // Permitir Enter en número de recarga para procesar
+    document.getElementById('numeroRecarga').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        submitRecharge();
+      }
+    });
+  </script>
+</body>
+</html>

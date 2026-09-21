@@ -1,0 +1,24 @@
+{
+  "name": "nequi-recargas-automation",
+  "version": "1.0.0",
+  "description": "Automatización de recargas Nequi para testing",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "interactive": "node src/interactive.js",
+    "server": "node server.js",
+    "test": "node src/index.js --test",
+    "debug": "DEBUG=true node src/index.js"
+  },
+  "keywords": ["nequi", "recargas", "automation", "testing"],
+  "author": "PSE Nequi Testing Team",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.48.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {}
+}

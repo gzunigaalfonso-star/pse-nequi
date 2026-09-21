@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automatización Recargas Nequi - Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+      font-size: 0.95em;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .data-table th {
+      background: #667eea;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .data-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .data-table tr:hover {
+      background: #f5f5f5;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .results-section {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+    }
+
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 10px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .log-output {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      max-height: 300px;
+      overflow-y: auto;
+      color: #333;
+    }
+
+    .log-line {
+      margin: 5px 0;
+      padding: 5px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .log-info { color: #0066cc; }
+    .log-success { color: #28a745; }
+    .log-error { color: #dc3545; }
+
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .footer {
+      text-align: center;
+      color: white;
+      margin-top: 30px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 Automatización Recargas Nequi</h1>
+      <p class="subtitle">Sistema de Testing - Vista Previa</p>
+    </header>
+
+    <div class="content">
+      <!-- Formulario -->
+      <div class="card">
+        <h2>📝 Formulario de Recarga</h2>
+        <form id="rechargeForm">
+          <div class="form-group">
+            <label for="numero1">Número de Celular</label>
+            <input type="tel" id="numero1" placeholder="300XXXXXXXX" required>
+          </div>
+
+          <div class="form-group">
+            <label for="numero2">Confirma el Número</label>
+            <input type="tel" id="numero2" placeholder="300XXXXXXXX" required>
+          </div>
+
+          <div class="form-group">
+            <label for="monto">¿Cuánto?</label>
+            <input type="number" id="monto" placeholder="5000" min="1000" step="1000" required>
+          </div>
+
+          <div class="form-group">
+            <label for="tipoPersona">Tipo de Persona</label>
+            <select id="tipoPersona" required>
+              <option value="">Selecciona...</option>
+              <option value="Natural">Natural</option>
+              <option value="Juridica">Jurídica</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="banco">Elige el Banco</label>
+            <select id="banco" required>
+              <option value="">Selecciona...</option>
+              <option value="ACCION FIDUCIARIA">ACCION FIDUCIARIA</option>
+              <option value="ALIANZA FIDUCIARIA">ALIANZA FIDUCIARIA</option>
+              <option value="BAN100">BAN100</option>
+              <option value="BANCAMIA S.A.">BANCAMIA S.A.</option>
+              <option value="BANCO AGRARIO">BANCO AGRARIO</option>
+              <option value="BANCO AV VILLAS">BANCO AV VILLAS</option>
+              <option value="BANCO BBVA COLOMBIA S.A.">BANCO BBVA COLOMBIA S.A.</option>
+              <option value="BANCO CAJA SOCIAL">BANCO CAJA SOCIAL</option>
+              <option value="BANCO CONTACTAR">BANCO CONTACTAR</option>
+              <option value="BANCO COOPERATIVO COOPCENTRAL">BANCO COOPERATIVO COOPCENTRAL</option>
+              <option value="BANCO DAVIVIENDA">BANCO DAVIVIENDA</option>
+              <option value="BANCO DE BOGOTA">BANCO DE BOGOTA</option>
+              <option value="BANCO DE OCCIDENTE">BANCO DE OCCIDENTE</option>
+              <option value="BANCO FALABELLA">BANCO FALABELLA</option>
+              <option value="BANCO FINANDINA S.A. BIC">BANCO FINANDINA S.A. BIC</option>
+              <option value="BANCO GNB SUDAMERIS">BANCO GNB SUDAMERIS</option>
+              <option value="BANCO ITAU">BANCO ITAU</option>
+              <option value="BANCO J.P. MORGAN COLOMBIA S.A.">BANCO J.P. MORGAN COLOMBIA S.A.</option>
+              <option value="BANCO MUNDO MUJER S.A.">BANCO MUNDO MUJER S.A.</option>
+              <option value="BANCO PICHINCHA S.A.">BANCO PICHINCHA S.A.</option>
+              <option value="BANCO POPULAR">BANCO POPULAR</option>
+              <option value="BANCO SANTANDER COLOMBIA">BANCO SANTANDER COLOMBIA</option>
+              <option value="BANCO SERFINANZA">BANCO SERFINANZA</option>
+              <option value="BANCO UNION">BANCO UNION</option>
+              <option value="BANCOLOMBIA">BANCOLOMBIA</option>
+              <option value="BANCOOMEVA S.A.">BANCOOMEVA S.A.</option>
+              <option value="BOLD CF">BOLD CF</option>
+              <option value="CFA COOPERATIVA FINANCIERA">CFA COOPERATIVA FINANCIERA</option>
+              <option value="CITIBANK">CITIBANK</option>
+              <option value="COLTEFINANCIERA">COLTEFINANCIERA</option>
+              <option value="CONFIAR COOPERATIVA FINANCIERA">CONFIAR COOPERATIVA FINANCIERA</option>
+              <option value="COTRAFA">COTRAFA</option>
+              <option value="CREZCAMOS">CREZCAMOS</option>
+              <option value="DALE">DALE</option>
+              <option value="DAVIbank S.A.">DAVIbank S.A.</option>
+              <option value="DAVIPLATA">DAVIPLATA</option>
+              <option value="DING">DING</option>
+              <option value="FINANCIERA JURISCOOP SA COMPAÑÍA DE FINANCIAMIENTO">FINANCIERA JURISCOOP SA COMPAÑÍA DE FINANCIAMIENTO</option>
+              <option value="IRIS">IRIS</option>
+              <option value="JFK COOPERATIVA FINANCIERA">JFK COOPERATIVA FINANCIERA</option>
+              <option value="LULO BANK">LULO BANK</option>
+              <option value="MOVII S.A.">MOVII S.A.</option>
+              <option value="NU">NU</option>
+              <option value="PAYCASH">PAYCASH</option>
+              <option value="POWWI">POWWI</option>
+              <option value="RAPPIPAY">RAPPIPAY</option>
+              <option value="UALÁ">UALÁ</option>
+            </select>
+          </div>
+
+          <button type="submit">Procesar Recarga</button>
+        </form>
+      </div>
+
+      <!-- Datos de Prueba -->
+      <div class="card">
+        <h2>📊 Datos de Prueba</h2>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Monto</th>
+              <th>Banco</th>
+            </tr>
+          </thead>
+          <tbody id="testDataTable">
+            <!-- Se llenará con JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="results-section">
+      <h2>📈 Resultados de Ejecución</h2>
+
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-label">Total</div>
+          <div class="stat-number" id="totalCount">5</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Exitosos</div>
+          <div class="stat-number" id="successCount">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Fallidos</div>
+          <div class="stat-number" id="failCount">0</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn-secondary" onclick="runAllTests()">Ejecutar Todos</button>
+        <button class="btn-secondary" onclick="clearLogs()">Limpiar Logs</button>
+        <button class="btn-secondary" onclick="downloadReport()">Descargar Reporte</button>
+      </div>
+
+      <div class="log-output" id="logOutput">
+        <div class="log-line log-info">[INFO] Sistema listo para ejecutar pruebas...</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>🤖 Sistema de Automatización para Testing - Nequi Recargas</p>
+    </div>
+  </div>
+
+  <script>
+    const testData = [
+      { numero: '3001234567', monto: 5000, tipoPersona: 'Natural', banco: 'ACCION FIDUCIARIA' },
+      { numero: '3009876543', monto: 10000, tipoPersona: 'Natural', banco: 'BANCO BBVA COLOMBIA S.A.' },
+      { numero: '3015555555', monto: 15000, tipoPersona: 'Natural', banco: 'BANCO DAVIVIENDA' },
+      { numero: '3025555555', monto: 20000, tipoPersona: 'Natural', banco: 'BANCO DE BOGOTA' },
+      { numero: '3035555555', monto: 25000, tipoPersona: 'Natural', banco: 'BANCO FALABELLA' },
+      { numero: '3041111111', monto: 8000, tipoPersona: 'Natural', banco: 'BANCOLOMBIA' },
+      { numero: '3052222222', monto: 12000, tipoPersona: 'Natural', banco: 'BANCO ITAU' },
+      { numero: '3063333333', monto: 18000, tipoPersona: 'Natural', banco: 'BANCO SANTANDER COLOMBIA' },
+      { numero: '3074444444', monto: 30000, tipoPersona: 'Natural', banco: 'BANCO PICHINCHA S.A.' },
+      { numero: '3085555555', monto: 7000, tipoPersona: 'Natural', banco: 'DAVIPLATA' }
+    ];
+
+    let results = [];
+
+    function loadTestData() {
+      const tbody = document.getElementById('testDataTable');
+      testData.forEach(data => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${data.numero}</td>
+          <td>$${data.monto.toLocaleString()}</td>
+          <td>${data.banco}</td>
+        `;
+      });
+      document.getElementById('totalCount').textContent = testData.length;
+    }
+
+    function addLog(message, type = 'info') {
+      const logOutput = document.getElementById('logOutput');
+      const timestamp = new Date().toLocaleTimeString();
+      const logLine = document.createElement('div');
+      logLine.className = `log-line log-${type}`;
+      logLine.textContent = `[${timestamp}] ${message}`;
+      logOutput.appendChild(logLine);
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+
+    function clearLogs() {
+      document.getElementById('logOutput').innerHTML = '<div class="log-line log-info">[INFO] Logs limpios</div>';
+    }
+
+    function updateStats() {
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.length - successCount;
+      document.getElementById('successCount').textContent = successCount;
+      document.getElementById('failCount').textContent = failCount;
+    }
+
+    async function processRecord(data) {
+      return new Promise(resolve => {
+        addLog(`Procesando: ${data.numero}`, 'info');
+
+        setTimeout(() => {
+          const success = Math.random() > 0.1; // 90% de éxito simulado
+          const result = { ...data, success, timestamp: new Date().toISOString() };
+          results.push(result);
+
+          if (success) {
+            addLog(`Completado: ${data.numero} - $${data.monto}`, 'success');
+          } else {
+            addLog(`Error en: ${data.numero} - Error de conexión`, 'error');
+          }
+
+          updateStats();
+          resolve(result);
+        }, 1500 + Math.random() * 1000);
+      });
+    }
+
+    async function runAllTests() {
+      results = [];
+      clearLogs();
+      addLog('Iniciando automatización...', 'info');
+      addLog(`Total de registros: ${testData.length}`, 'info');
+
+      for (const data of testData) {
+        await processRecord(data);
+      }
+
+      addLog('Automatización completada', 'success');
+    }
+
+    function downloadReport() {
+      const report = {
+        timestamp: new Date().toISOString(),
+        total: results.length,
+        success: results.filter(r => r.success).length,
+        failed: results.filter(r => !r.success).length,
+        records: results
+      };
+
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    }
+
+    document.getElementById('rechargeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        numero: document.getElementById('numero1').value,
+        monto: parseInt(document.getElementById('monto').value),
+        tipoPersona: document.getElementById('tipoPersona').value,
+        banco: document.getElementById('banco').value
+      };
+
+      addLog(`Formulario enviado: ${formData.numero}`, 'info');
+      await processRecord(formData);
+      e.target.reset();
+    });
+
+    // Cargar datos al iniciar
+    loadTestData();
+  </script>
+</body>
+</html>
