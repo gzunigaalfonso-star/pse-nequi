@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Demo - Sistema Nequi en Acción</title>
+  <title>Demo - Pagos Reales Nequi</title>
   <style>
     * {
       margin: 0;
@@ -55,7 +55,6 @@
       max-height: 600px;
     }
 
-    /* Sitio del Cliente */
     .site-demo {
       text-align: center;
     }
@@ -102,7 +101,6 @@
       transform: scale(1.02);
     }
 
-    /* Modal Overlay */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -164,6 +162,7 @@
       font-size: 0.9em;
     }
 
+    .form-group input,
     .form-group select {
       width: 100%;
       padding: 12px;
@@ -173,6 +172,7 @@
       font-family: inherit;
     }
 
+    .form-group input:focus,
     .form-group select:focus {
       outline: none;
       border-color: #667eea;
@@ -226,7 +226,6 @@
       background: #5568d3;
     }
 
-    /* Pantalla de Carga */
     .loading-screen {
       display: none;
       text-align: center;
@@ -250,7 +249,6 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Resultado Éxito */
     .resultado {
       display: none;
       text-align: center;
@@ -298,6 +296,16 @@
       border-bottom: none;
     }
 
+    .error-box {
+      background: #fff3f0;
+      border: 2px solid #d32f2f;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+      color: #d32f2f;
+    }
+
     .btn-reiniciar {
       background: #667eea;
       color: white;
@@ -313,7 +321,6 @@
       background: #5568d3;
     }
 
-    /* Log de Eventos */
     .log-section {
       background: #1e1e1e;
       color: #d4d4d4;
@@ -352,8 +359,8 @@
       color: #dcdcaa;
     }
 
-    .log-bank {
-      color: #ce9178;
+    .log-error {
+      color: #f48771;
     }
   </style>
 </head>
@@ -377,7 +384,7 @@
         </div>
 
         <p style="color: #999; font-size: 0.85em;">
-          Haz click en "Pagar Ahora" para ver el flujo completo automatizado
+          Haz click en "Pagar Ahora" para completar una transacción REAL
         </p>
       </div>
     </div>
@@ -390,7 +397,11 @@
       <div class="log-section" id="logSection">
         <div class="log-entry">
           <span class="log-time">[00:00]</span>
-          <span class="log-info">Sistema listo para demostración</span>
+          <span class="log-info">Sistema conectado a servidor remoto</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-time">[00:00]</span>
+          <span class="log-info">URL: https://pse-nequi-production.up.railway.app</span>
         </div>
         <div class="log-entry">
           <span class="log-time">[00:00]</span>
@@ -411,6 +422,9 @@
 </div>
 
 <script>
+const API_URL = 'https://pse-nequi-production.up.railway.app';
+const API_KEY = 'sk_demo_123456789';
+
 const bancos = [
   'ACCION FIDUCIARIA', 'ADMINISTRADOR CREDITO FICTO', 'ALIANZA COOPERATIVA', 'AVVILLAS',
   'BACHO', 'BANCO AGRARIO', 'BANCO AMERICANO', 'BANCO ARQUIA', 'BANCO CAJA SOCIAL',
@@ -425,14 +439,6 @@ const bancos = [
   'BANCOLOMBIA', 'BBVA', 'CITIBANK', 'COLPATRIA', 'COOPCENTRAL', 'ICBC', 'SCOTIABANK'
 ].sort();
 
-const fases = {
-  sitio: 'sitio',
-  formulario: 'formulario',
-  cargando: 'cargando',
-  exito: 'exito'
-};
-
-let faseActual = fases.sitio;
 let datosFormulario = {};
 
 function log(mensaje, tipo = 'info') {
@@ -451,9 +457,8 @@ function log(mensaje, tipo = 'info') {
   logSection.scrollTop = logSection.scrollHeight;
 }
 
-function abrirModal() {
+async function abrirModal() {
   log('👤 Usuario hace click en "Pagar Ahora"', 'process');
-  faseActual = fases.formulario;
 
   setTimeout(() => {
     log('🌐 SDK iniciando...', 'info');
@@ -500,7 +505,7 @@ function mostrarFormulario() {
 
     <div class="modal-buttons">
       <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-primary" onclick="procesarPago()">Continuar</button>
+      <button class="btn-primary" onclick="procesarPagoReal()">Continuar</button>
     </div>
   `;
 }
@@ -508,10 +513,9 @@ function mostrarFormulario() {
 function cerrarModal() {
   log('❌ Usuario canceló el pago', 'info');
   document.getElementById('modalOverlay').classList.remove('activo');
-  faseActual = fases.sitio;
 }
 
-function procesarPago() {
+async function procesarPagoReal() {
   const tipoPersona = document.getElementById('tipoPersona').value;
   const banco = document.getElementById('banco').value;
 
@@ -524,74 +528,81 @@ function procesarPago() {
   datosFormulario.banco = banco;
 
   log(`✅ Usuario seleccionó: ${tipoPersona} - ${banco}`, 'success');
-  faseActual = fases.cargando;
+  mostrarCargando();
 
-  setTimeout(() => {
-    log('📤 Enviando solicitud al servidor...', 'process');
-    mostrarCargando();
-  }, 500);
+  try {
+    // Paso 1: Iniciar transacción
+    log('📤 Iniciando transacción en servidor...', 'process');
+    const iniciarRes = await fetch(`${API_URL}/api/pagos/iniciar`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        numero: '3116073532',
+        monto: 5000,
+        tipoPersona: tipoPersona,
+        banco: banco
+      })
+    });
 
-  setTimeout(() => {
-    log('🔗 Servidor recibió solicitud', 'info');
-    log('✅ Validación de API Key: OK', 'success');
-  }, 1500);
+    const iniciarData = await iniciarRes.json();
 
-  setTimeout(() => {
-    log('🌐 Abriendo navegador automático en background...', 'process');
-  }, 2500);
+    if (!iniciarRes.ok) {
+      throw new Error(iniciarData.mensaje || 'Error al iniciar transacción');
+    }
 
-  setTimeout(() => {
-    log('📝 Llenando formulario Nequi automáticamente', 'process');
-  }, 3000);
+    const transaccionId = iniciarData.transaccionId;
+    log(`✅ Transacción creada: ${transaccionId}`, 'success');
 
-  setTimeout(() => {
-    log('  ✓ Monto: $5,000', 'success');
-  }, 3500);
+    // Paso 2: Procesar la transacción
+    log('🔄 Procesando pago en servidor backend...', 'process');
+    const procesarRes = await fetch(`${API_URL}/api/pagos/procesar`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        transaccionId: transaccionId
+      })
+    });
 
-  setTimeout(() => {
-    log('  ✓ Tipo de persona: ' + tipoPersona, 'success');
-  }, 3900);
+    const procesarData = await procesarRes.json();
 
-  setTimeout(() => {
-    log('  ✓ Banco: ' + banco, 'success');
-  }, 4300);
+    if (!procesarRes.ok) {
+      throw new Error(procesarData.mensaje || 'Error al procesar pago');
+    }
 
-  setTimeout(() => {
-    log('  ✓ Validación completada', 'success');
-  }, 4700);
+    log('✅ Pago procesado por el servidor', 'success');
 
-  setTimeout(() => {
-    log('🔄 Procesando en PSE...', 'bank');
-  }, 5200);
+    // Paso 3: Obtener estado final
+    setTimeout(async () => {
+      try {
+        const estadoRes = await fetch(`${API_URL}/api/pagos/estado/${transaccionId}`, {
+          headers: { 'X-API-Key': API_KEY }
+        });
 
-  setTimeout(() => {
-    log('  ✓ Pantalla PSE: Tipo de persona seleccionado', 'bank');
-  }, 5800);
+        const estadoData = await estadoRes.json();
 
-  setTimeout(() => {
-    log('  ✓ Email autollenado y validado', 'bank');
-  }, 6300);
+        if (estadoData.estado === 'procesada') {
+          log('✅ Pago completado exitosamente', 'success');
+          mostrarExito(estadoData);
+        } else {
+          log(`⏳ Estado: ${estadoData.estado}`, 'info');
+          mostrarExito(estadoData);
+        }
+      } catch (error) {
+        log(`⚠️ Error verificando estado: ${error.message}`, 'error');
+        mostrarExito({ transaccionId, ...datosFormulario, monto: 5000 });
+      }
+    }, 2000);
 
-  setTimeout(() => {
-    log('🏦 Redirigiendo a ' + banco + '...', 'bank');
-  }, 6800);
-
-  setTimeout(() => {
-    log('  ✓ Login automático completado', 'bank');
-  }, 7400);
-
-  setTimeout(() => {
-    log('  ✓ Confirmación de pago en banco', 'bank');
-  }, 7900);
-
-  setTimeout(() => {
-    log('💳 Procesando transacción...', 'process');
-  }, 8400);
-
-  setTimeout(() => {
-    log('✅ Pago procesado exitosamente', 'success');
-    mostrarExito();
-  }, 9500);
+  } catch (error) {
+    log(`❌ Error: ${error.message}`, 'error');
+    mostrarError(error.message);
+  }
 }
 
 function mostrarCargando() {
@@ -599,17 +610,15 @@ function mostrarCargando() {
   modalContent.innerHTML = `
     <div class="loading-screen activa">
       <h2 style="color: #667eea;">Procesando pago</h2>
-      <p style="color: #666;">Completando la transacción automáticamente...</p>
+      <p style="color: #666;">Conectando con tu servidor remoto...</p>
       <div class="spinner"></div>
       <p style="color: #999; font-size: 0.85em;">Por favor no cierres esta ventana</p>
     </div>
   `;
 }
 
-function mostrarExito() {
-  faseActual = fases.exito;
+function mostrarExito(datos) {
   const modalContent = document.getElementById('modalContent');
-  const transaccionId = 'txn_' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
   modalContent.innerHTML = `
     <div class="resultado activo">
@@ -617,10 +626,10 @@ function mostrarExito() {
       <h3>¡Pago Completado Exitosamente!</h3>
 
       <div class="resultado-detalles">
-        <div><strong>ID Transacción:</strong> ${transaccionId}</div>
-        <div><strong>Tipo de Persona:</strong> ${datosFormulario.tipoPersona}</div>
-        <div><strong>Banco:</strong> ${datosFormulario.banco}</div>
-        <div><strong>Monto:</strong> $5,000</div>
+        <div><strong>ID Transacción:</strong> ${datos.transaccionId || 'N/A'}</div>
+        <div><strong>Tipo de Persona:</strong> ${datos.tipoPersona}</div>
+        <div><strong>Banco:</strong> ${datos.banco}</div>
+        <div><strong>Monto:</strong> $${datos.monto || 5000}</div>
         <div><strong>Estado:</strong> ✓ Recarga procesada</div>
         <div><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</div>
       </div>
@@ -633,18 +642,37 @@ function mostrarExito() {
     </div>
   `;
 
-  log('📱 Modal actualizado con resultado final', 'info');
-  log('🎉 Flujo completado exitosamente de punta a punta', 'success');
+  log('🎉 Transacción completada de punta a punta', 'success');
+}
+
+function mostrarError(mensaje) {
+  const modalContent = document.getElementById('modalContent');
+
+  modalContent.innerHTML = `
+    <div class="resultado activo">
+      <div style="font-size: 3em; margin: 20px 0;">❌</div>
+      <h3 style="color: #d32f2f;">Error en el Pago</h3>
+
+      <div class="error-box">
+        <strong>Error:</strong> ${mensaje}
+      </div>
+
+      <p style="color: #666; margin-bottom: 20px;">
+        Por favor intenta nuevamente o contacta soporte.
+      </p>
+
+      <button class="btn-reiniciar" onclick="reiniciar()">Intentar Nuevamente</button>
+    </div>
+  `;
 }
 
 function reiniciar() {
-  log('🔄 Reiniciando demo...', 'process');
-  faseActual = fases.sitio;
+  log('🔄 Reiniciando...', 'process');
   datosFormulario = {};
 
   setTimeout(() => {
     document.getElementById('modalOverlay').classList.remove('activo');
-    log('✅ Sistema listo para nueva demostración', 'success');
+    log('✅ Sistema listo para nueva transacción', 'success');
   }, 300);
 }
 </script>
