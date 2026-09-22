@@ -8,7 +8,7 @@ window.NequiPago = (function() {
   'use strict';
 
   const config = {
-    apiUrl: 'http://localhost:3000',
+    apiUrl: 'https://pse-nequi-production.up.railway.app',
     apiKey: '',
     debug: true
   };
